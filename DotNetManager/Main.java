@@ -1,5 +1,3 @@
-package com.company;
-
 import java.io.InputStream;
 import java.lang.String;
 
