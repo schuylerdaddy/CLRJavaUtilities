@@ -1,20 +1,20 @@
 package com.company;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.String;
-import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException{
+    public static void main(String[] args) throws InterruptedException, Exception{
 
         try {
             DotNetServiceManager dnsm = new DotNetServiceManager();
             InputStream is =dnsm.getOutPutStream(HttpMethod.GET, "https://www.google.com", null, null);
-            Thread pipe = new Pipe(is, System.out);
-            pipe.start();
-            pipe.join();
+            Thread outPipe = new Pipe(is, System.out);
+            Thread errPipe = new Pipe(dnsm.getErrStream(), System.err);
+            errPipe.start();
+            outPipe.start();
+            outPipe.join();
+            errPipe.join();
         } catch (Exception e) {
             e.printStackTrace();
         }

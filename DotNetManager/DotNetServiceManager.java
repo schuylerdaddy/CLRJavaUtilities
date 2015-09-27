@@ -1,8 +1,5 @@
 package com.company;
 
-import sun.net.www.content.text.PlainTextInputStream;
-
-import javax.sound.sampled.AudioInputStream;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +20,6 @@ public class DotNetServiceManager {
         }
 
         String [] args = getCommandListString(method.toString(), url,body, headers);
-        for(String s:args){
-            System.out.println(s);
-        }
         process = Runtime.getRuntime().exec(args);
 
         return process.getInputStream();
@@ -62,5 +56,12 @@ public class DotNetServiceManager {
         }
 
         return retval;
+    }
+
+    public InputStream getErrStream() throws Exception{
+        if(process == null){
+            throw new Exception("MagicException:Domo is ready but has encountered a temporary error:Process not started");
+        }
+        return process.getErrorStream();
     }
 }
