@@ -13,9 +13,10 @@ namespace CLIWebService
 					DeveloperKey = "ac93793a-4b71-44d4-ad4d-d302c39c238c",
 					Password = "Domo123!"
 				};
-				AdminService admin = AdminService.getInstance ("ac93793a-4b71-44d4-ad4d-d302c39c238c", "Domo123!");
+				//AdminService admin = AdminService.getInstance ("ac93793a-4b71-44d4-ad4d-d302c39c238c", "Domo123!");
+				AdminService admin = AdminService.getInstance (args["developerKey"], "developerPassword");
 				admin.APICredentialsValue = creds;
-				var result = admin.GetAuthorizationList("120082").ResultData;
+				var result = admin.GetAuthorizationList(args["localId"]).ResultData;
 
 				foreach (AuthorizationResponse resp in result) {
 					Console.WriteLine (resp.AccountID + ":" + resp.LocalID);
