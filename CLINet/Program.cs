@@ -7,45 +7,50 @@ using System.Net.Http.Headers;
 
 namespace CLIWebService
 {
+	static class ExtensionClass{
+		static public string get(this Dictionary<string,string> dic, string key){
+			if (dic.ContainsKey (key))
+				return dic [key];
+			throw new Exception ("Cannot process.  Required field: '"+key+"'");
+		}
+	}
+
 	class MainClass
 	{
 		static string[] CLIargs;
 		static Dictionary<String,String> arguments = new Dictionary<String,String>();
-		static Dictionary<String,String> headers = new Dictionary<String,String>(); 
+		static Dictionary<String,String> headers = new Dictionary<String,String>();
+		static String command;
 		
 		public static void Main (string[] args)
 		{
 			try{
 				CLIargs = args;
-				RunAsync().Wait();
+				LoadClient ();
+				Run();
 			}
 
 			catch(Exception ex){
 
 				Console.WriteLine("Error occured in dot net!");
-				Console.Error.WriteLine(ex.StackTrace);
+				Console.Error.WriteLine (ex.Message);
+				Console.Error.WriteLine (ex.StackTrace);
 			}
 		}
 
-		static async Task RunAsync()
+		static void Run()
 		{
-			String command = arguments ["command"];
-			Console.WriteLine ("Loading args");
-			LoadClient ();
-			Console.WriteLine ("Finished args");
 			HttpResponseMessage response = null;
-			Console.WriteLine ("Processing Command '"+command + "'");
 			switch(command.ToLower()){
 
 			case "get":
 				HttpClient client = new HttpClient ();
-				Console.WriteLine ("Attempting uri: " + arguments ["uri"]);
 				client.BaseAddress = new Uri (arguments ["uri"]);
 
 
 				client.DefaultRequestHeaders.Accept.Add(
 					new MediaTypeWithQualityHeaderValue("text/plain"));
-				response = await client.GetAsync ("");
+				//response = await client.GetAsync ("");
 				if (response.IsSuccessStatusCode) {
 					Console.WriteLine(response.ToString ());
 				}
@@ -59,16 +64,16 @@ namespace CLIWebService
 				var content = new FormUrlEncodedContent (new[] {
 					new KeyValuePair<string, string> ("", arguments ["body"])
 				});
-				response = await postClient.PostAsync (arguments ["uri"], content);
+				//response = await postClient.PostAsync (arguments ["uri"], content);
 				if (response.IsSuccessStatusCode) {
-					Console.WriteLine (response.ToString ());
+					Console.WriteLine(response.ToString ());
 				} else {
 					ProcessResponseCode ((int)response.StatusCode);
 				}
 				break;
 			case "wsdl":
 				WSDLManager wsdl = new WSDLManager ();
-				wsdl.runService ("ChannelAdvisor.Admin",arguments);//arguments["wsdl"],arguments);
+				wsdl.runService (arguments.get("service"),arguments);//arguments["wsdl"],arguments);
 				break;
 			default:
 				throw new Exception ("Invalid command '"+command+"'");
@@ -81,6 +86,8 @@ namespace CLIWebService
 		static void LoadClient(){
 			if (CLIargs.Length == 0)
 				throw new Exception ("~*~MagicException:Domo is ready but encountered an error in the network:No command argument passed to .NET CLI");
+
+			command = CLIargs [0];
 
 			for (int idx = 1; idx < CLIargs.Length; ++idx) {
 				string[] keyValue = CLIargs [idx].Split (':');
@@ -102,9 +109,9 @@ namespace CLIWebService
 		/// <param name="code">Response Code Number</param>
 		static void ProcessResponseCode(int code){
 			if (code == 401) {
-				throw new Exception ("~*~HttpException:Domo is ready but authentication failed with the credentials provided:Receive 401 error in .NET CLI");
+				throw new Exception ("~*~HttpException:Domo is ready but authentication failed with the credentials provided:Received 401 error in .NET CLI");
 			} else if (code % 400 == 4) {
-				throw new Exception ("~*~HttpException:Domo is ready but authentication failed with the credentials provided:Receive 401 error in .NET CLI");
+				throw new Exception ("~*~HttpException:Domo is ready but authentication failed with the credentials provided:Received non 401 error");
 			}
 		}	
 	}

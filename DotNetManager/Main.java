@@ -1,18 +1,18 @@
 import java.io.InputStream;
 import java.lang.String;
+import java.util.HashMap;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, Exception{
+    public static void main(String[] args) throws Exception{
 
         try {
             DotNetServiceManager dnsm = new DotNetServiceManager();
-            InputStream is =dnsm.getOutPutStream(HttpMethod.GET, "https://www.google.com", null, null);
-            Thread outPipe = new Pipe(is, System.out);
-            Thread errPipe = new Pipe(dnsm.getErrStream(), System.err);
-            errPipe.start();
-            outPipe.start();
-            outPipe.join();
-            errPipe.join();
+
+            HashMap<String,String> map = new HashMap<>();
+            map.put("temperature","1");
+            System.out.println(dnsm.getWSDLServiceResultString("CelsiusToFarenheit",map));
+            dnsm.waitForErrors();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
